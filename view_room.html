@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chat-main {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden; 
+        }
+        #message_input{
+            width:50%;
+        }
+        .btn{
+            width:100px;
+        }
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            max-height: calc(100vh - 260px); 
+        }
+        
+        .message-form {
+            position: sticky;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem;
+            border-top: 1px solid rgba(226, 232, 240, 0.5);
+            display: flex;
+            gap: 1rem;
+            margin-top: auto; /* Push to bottom */
+            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .chat-container {
+            height: calc(100vh - 180px);
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 0;
+            overflow: hidden;
+        }
+        
+        .members-panel {
+            border-left: 1px solid rgba(226, 232, 240, 0.5);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+    
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .chat-container {
+                grid-template-columns: 1fr;
+                height: calc(100vh - 150px);
+            }
+            
+            .members-panel {
+                display: none; /* Hide on mobile or make collapsible */
+            }
+            
+            #messages {
+                max-height: calc(100vh - 220px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar glass-card">
+            <div class="logo">
+                <a href="/"><i class="fas fa-comments"></i> Premium Chat</a>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Spaces</a>
+                {% if current_user.is_authenticated %}
+                    <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <h1><i class="fas fa-comment-dots"></i> {{ room.name }}</h1>
+
+        <div class="chat-container glass-card">
+            <div class="chat-main">
+                <div id="messages">
+                    {% for message in room_messages %}
+                        {% if message.username == "system" %}
+                            <div class="message system-message">{{ message.message }}</div>
+                        {% else %}
+                            <div class="message {% if message.username == username %}user-message{% else %}other-message{% endif %}">
+                                <b>{{ message.username }}:&nbsp;</b> {{ message.message }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <form id="message_input_form" class="message-form">
+                    <input type="text" id="message_input" placeholder="Type your message here..." autocomplete="off">
+                    <button type="submit" class="btn btn-primary send-btn"><i class="fas fa-paper-plane"></i> Send</button>
+                </form>
+            </div>
+
+            <div class="members-panel">
+                <h3><i class="fas fa-users"></i> Members</h3>
+                <ul id="members-list" class="members-list">
+                    {% for member in room_members %}
+                        <li class="member-item {% if member._id.username == username %}current-user{% endif %}">
+                            <div class="member-avatar">
+                                {{ member._id.username[0]|upper }}
+                            </div>
+                            <span>{{ member._id.username }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        // Dynamic socket URL based on current location
+        const socketUrl = window.location.protocol + '//' + window.location.host;
+        const socket = io(socketUrl, {
+            transports: ['websocket'],
+            withCredentials: true
+        });
+
+        // Room and user info
+        const roomId = "{{ room._id|string }}";
+        const currentUsername = "{{ username }}";
+
+        socket.on('connect', function () {
+            console.log('Connected to socket.io server');
+            socket.emit('join_room', {
+                username: currentUsername,
+                room: "{{ room_id_str }}"
+            });
+
+            let message_input = document.getElementById('message_input');
+
+            document.getElementById('message_input_form').onsubmit = function (e) {
+                e.preventDefault();
+                let message = message_input.value.trim();
+                if (message.length) {
+                    socket.emit('send_message', {
+                        username: currentUsername,
+                        room: roomId,
+                        message: message
+                    });
+                }
+                message_input.value = '';
+                message_input.focus();
+            }
+        });
+
+        window.onbeforeunload = function () {
+            socket.emit('leave_room', {
+                username: currentUsername,
+                room: roomId
+            });
+        };
+
+        socket.on('receive_message', function(data) {
+            const messagesDiv = document.getElementById('messages');
+            const newNode = document.createElement('div');
+            
+            // Apply proper message styling
+            if (data.username === "system") {
+                newNode.className = "message system-message";
+                newNode.textContent = data.message;
+            } else {
+                newNode.className = `message ${data.username === currentUsername ? 'user-message' : 'other-message'}`;
+                newNode.innerHTML = `<b>${data.username}:&nbsp;</b> ${data.message}`;
+            }
+            
+            messagesDiv.appendChild(newNode);
+            // Auto-scroll to bottom
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+
+        socket.on('join_room_announcement', function (data) {
+            if (data.username !== currentUsername) {
+                const messagesDiv = document.getElementById('messages');
+                const newNode = document.createElement('div');
+                newNode.className = "message system-message";
+                newNode.innerHTML = `<b>${data.username}</b> has joined the room`;
+                messagesDiv.appendChild(newNode);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                
+                // Fetch updated member list
+                fetchMembersList();
+            }
+        });
+
+        socket.on('leave_room_announcement', function (data) {
+            const messagesDiv = document.getElementById('messages');
+            const newNode = document.createElement('div');
+            newNode.className = "message system-message";
+            newNode.innerHTML = `<b>${data.username}</b> has left the room`;
+            messagesDiv.appendChild(newNode);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            // Fetch updated member list
+            fetchMembersList();
+        });
+        
+        // Function to fetch updated members list via AJAX
+        function fetchMembersList() {
+            fetch(`/api/room/${roomId}/members`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateMembersList(data.members);
+                    }
+                })
+                .catch(error => console.error('Error fetching members:', error));
+        }
+        
+        // Function to update members list in the UI
+        function updateMembersList(members) {
+            const membersList = document.getElementById('members-list');
+            membersList.innerHTML = '';
+            
+            members.forEach(member => {
+                const li = document.createElement('li');
+                li.className = `member-item ${member.username === currentUsername ? 'current-user' : ''}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'member-avatar';
+                avatar.textContent = member.username[0].toUpperCase();
+                
+                const span = document.createElement('span');
+                span.textContent = member.username;
+                
+                li.appendChild(avatar);
+                li.appendChild(span);
+                membersList.appendChild(li);
+            });
+        }
+        
+        // Make sure messages container scrolls to bottom on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            
+            // Add typing indicator functionality
+            const messageInput = document.getElementById('message_input');
+            let typingTimer;
+            
+            messageInput.addEventListener('input', function() {
+                clearTimeout(typingTimer);
+                
+                // Emit typing event
+                socket.emit('typing', {
+                    username: currentUsername,
+                    room: roomId
+                });
+                
+                // Clear typing status after 2 seconds of inactivity
+                typingTimer = setTimeout(() => {
+                    socket.emit('stop_typing', {
+                        username: currentUsername,
+                        room: roomId
+                    });
+                }, 2000);
+            });
+            
+            // Focus the message input on page load
+            document.getElementById('message_input').focus();
+        });
+        
+        // Handle typing indicators
+        socket.on('user_typing', function(data) {
+            if (data.username !== currentUsername) {
+                // Show typing indicator
+                let typingIndicator = document.getElementById('typing-indicator');
+                if (!typingIndicator) {
+                    typingIndicator = document.createElement('div');
+                    typingIndicator.id = 'typing-indicator';
+                    typingIndicator.className = 'message system-message typing';
+                    document.getElementById('messages').appendChild(typingIndicator);
+                }
+                typingIndicator.innerHTML = `<i>${data.username} is typing...</i>`;
+                
+                // Auto-scroll if near bottom
+                const messagesDiv = document.getElementById('messages');
+                if (messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight < 100) {
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                }
+            }
+        });
+        
+        socket.on('user_stop_typing', function(data) {
+            if (data.username !== currentUsername) {
+                // Remove typing indicator
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+        });
+        
+        // Handle connection errors
+        socket.on('connect_error', function(error) {
+            console.error('Connection error:', error);
+            // Show connection error message
+            const messagesDiv = document.getElementById('messages');
+            const errorNode = document.createElement('div');
+            errorNode.className = "message system-message error";
+            errorNode.innerHTML = `<b>Connection error:</b> Please check your internet connection`;
+            messagesDiv.appendChild(errorNode);
+        });
+
+        // Handle window resize to adjust message area height
+        window.addEventListener('resize', function() {
+            adjustMessageAreaHeight();
+        });
+
+        function adjustMessageAreaHeight() {
+            const messagesDiv = document.getElementById('messages');
+            // Adjust based on viewport height and other elements
+            messagesDiv.style.maxHeight = `calc(100vh - ${window.innerWidth <= 768 ? 220 : 260}px)`;
+        }
+
+        // Initial adjustment
+        adjustMessageAreaHeight();
+    </script>
+</body>
+</html>

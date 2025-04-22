@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Space | Premium Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar glass-card">
+            <div class="logo">
+                <a href="/"><i class="fas fa-comments"></i> Premium Chat</a>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link"><i class="fas fa-arrow-left"></i> Back</a>
+                <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+        </nav>
+
+        <div class="glass-card form-container">
+            <div class="form-header">
+                <h1><i class="fas fa-plus-circle"></i> Create New Space</h1>
+                <p>Design your perfect conversation environment</p>
+            </div>
+
+            {% if message %}
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ message }}
+                </div>
+            {% endif %}
+            
+            <form method="post">
+                <div class="form-group">
+                    <label for="room_name">Space Name</label>
+                    <div class="input-group">
+                        <i class="fas fa-pencil-alt"></i>
+                        <input type="text" id="room_name" name="room_name" placeholder="e.g. Creative Brainstorm" required>
+                    </div>
+                    <p class="form-hint">
+                        <i class="fas fa-lightbulb"></i> Choose a name that reflects your space's purpose
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="members">Invite Members</label>
+                    <div class="input-group">
+                        <i class="fas fa-user-plus"></i>
+                        <input type="text" id="members" name="members" placeholder="username1, username2, username3" required>
+                    </div>
+                    <p class="form-hint">
+                        <i class="fas fa-info-circle"></i> Separate multiple usernames with commas
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label>Space Type</label>
+                    <div class="input-group">
+                        <i class="fas fa-layer-group"></i>
+                        <select name="room_type" style="appearance: none; padding-right: 2rem;">
+                            <option value="general">General Discussion</option>
+                            <option value="project">Project Collaboration</option>
+                            <option value="social">Social Space</option>
+                            <option value="support">Support Channel</option>
+                        </select>
+                        <i class="fas fa-chevron-down" style="left: auto; right: 1.5rem;"></i>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Space Theme</label>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 0.5rem;">
+                        <div class="theme-option" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%); cursor: pointer; border: 2px solid transparent;" onclick="this.style.border='2px solid #000'"></div>
+                            <span style="font-size: 0.8rem;">Default</span>
+                        </div>
+                        <div class="theme-option" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #0caa6e 0%, #057955 100%); cursor: pointer; border: 2px solid transparent;" onclick="this.style.border='2px solid #000'"></div>
+                            <span style="font-size: 0.8rem;">Forest</span>
+                        </div>
+                        <div class="theme-option" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #f9c74f 0%, #f8961e 100%); cursor: pointer; border: 2px solid transparent;" onclick="this.style.border='2px solid #000'"></div>
+                            <span style="font-size: 0.8rem;">Sunset</span>
+                        </div>
+                        <div class="theme-option" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); cursor: pointer; border: 2px solid transparent;" onclick="this.style.border='2px solid #000'"></div>
+                            <span style="font-size: 0.8rem;">Ruby</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Privacy Settings</label>
+                    <div style="display: flex; align-items: center; gap: 2rem; margin-top: 0.5rem;">
+                        <div class="privacy-option" style="display: flex; align-items: center; gap: 0.75rem;">
+                            <input type="radio" id="private" name="privacy" value="private" checked style="width: auto;">
+                            <label for="private" style="margin-bottom: 0;">
+                                <i class="fas fa-lock" style="color: #3a0ca3;"></i> Private
+                            </label>
+                        </div>
+                        <div class="privacy-option" style="display: flex; align-items: center; gap: 0.75rem;">
+                            <input type="radio" id="public" name="privacy" value="public" style="width: auto;">
+                            <label for="public" style="margin-bottom: 0;">
+                                <i class="fas fa-globe" style="color: #3a0ca3;"></i> Public
+                            </label>
+                        </div>
+                    </div>
+                    <p class="form-hint">
+                        <i class="fas fa-shield-alt"></i> Private spaces are only visible to invited members
+                    </p>
+                </div>
+                
+                <div style="display: flex; justify-content: center; margin-top: 3rem;">
+                    <button type="submit" class="btn btn-primary" style="padding: 1.25rem 3rem; max-width: 400px;">
+                        <i class="fas fa-magic"></i> Create Space
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Floating decorative elements -->
+        <div style="position: fixed; top: 20%; right: 5%; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 70%); z-index: -1; animation: float 6s ease-in-out infinite;"></div>
+        <div style="position: fixed; bottom: 10%; left: 5%; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(249, 199, 79, 0.1) 0%, rgba(249, 199, 79, 0) 70%); z-index: -1; animation: float 8s ease-in-out infinite 2s;"></div>
+    </div>
+</body>
+</html>

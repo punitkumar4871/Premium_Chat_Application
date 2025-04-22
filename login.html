@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Chat App - Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo">
+                <a href="/"><i class="fas fa-comments"></i> My Chat App</a>
+            </div>
+            <div class="nav-links">
+                <a href="/signup" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
+            </div>
+        </nav>
+
+        <div class="form-container glass-card">
+            <div class="form-header">
+                <h1>Welcome Back</h1>
+                <p>Enter your credentials to access your chat rooms</p>
+            </div>
+            
+            {% if message %}
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i> {{ message }}
+                </div>
+            {% endif %}
+            
+            <form method="post" action="/login">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-group">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                        <span class="password-toggle" onclick="togglePasswordVisibility()">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="remember" name="remember">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <a href="/forgot-password" class="forgot-password">Forgot password?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-primary login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+            
+            <div class="form-footer">
+                <p>Don't have an account? <a href="/signup" class="signup-link">Sign up here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const icon = document.querySelector('.password-toggle i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(event) {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (username === '') {
+                event.preventDefault();
+                showValidationError('username', 'Username is required');
+            }
+            
+            if (password === '') {
+                event.preventDefault();
+                showValidationError('password', 'Password is required');
+            }
+        });
+        
+        function showValidationError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorElement = document.createElement('div');
+            errorElement.className = 'validation-error';
+            errorElement.textContent = message;
+            
+            // Remove any existing error messages
+            const existingError = field.parentNode.querySelector('.validation-error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            field.parentNode.appendChild(errorElement);
+            field.classList.add('error');
+            
+            // Clear the error when the user starts typing
+            field.addEventListener('input', function() {
+                const error = field.parentNode.querySelector('.validation-error');
+                if (error) {
+                    error.remove();
+                }
+                field.classList.remove('error');
+            }, { once: true });
+        }
+    </script>
+</body>
+</html>

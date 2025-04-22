@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium Chat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Improved navbar with glass-card effect -->
+        <nav class="navbar glass-card">
+            <div class="logo">
+                <a href="/"><i class="fas fa-comments"></i> Premium Chat</a>
+            </div>
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <a href="/create-room" class="nav-link"><i class="fas fa-plus-circle"></i> New Space</a>
+                    <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                {% else %}
+                    <a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="/signup" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
+                {% endif %}
+            </div>
+        </nav>
+
+        <!-- Main content area -->
+        <div class="glass-card" style="padding: 3rem; text-align: center; margin-bottom: 3rem;">
+            <h1 style="margin-bottom: 1rem;"><i class="fas fa-comments"></i> Welcome to Premium Chat</h1>
+            <p style="font-size: 1.25rem; max-width: 700px; margin: 0 auto;">
+                Connect and collaborate in real-time with friends and colleagues in your custom chat spaces.
+            </p>
+            
+            {% if current_user.is_authenticated %}
+                <h3 style="margin-top: 2rem; display: inline-flex; align-items: center; gap: 0.75rem;">
+                    <i class="fas fa-user-circle"></i> Hello, {{ current_user.username }}!
+                </h3>
+            {% endif %}
+        </div>
+
+        {% if current_user.is_authenticated %}
+            <div class="glass-card" style="padding: 2.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="margin-bottom: 0;"><i class="fas fa-layer-group"></i> My Spaces</h2>
+                    <a href="/create-room">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-plus-circle"></i> Create New Space
+                        </button>
+                    </a>
+                </div>
+                
+                {% if rooms %}
+                    <div class="rooms-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                        {% for room in rooms %}
+                            <a href="/rooms/{{ room._id.room_id }}" style="text-decoration: none;">
+                                <div class="room-card" style="padding: 1.5rem; background: white; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-lg); transition: var(--transition-smooth); border: 1px solid rgba(226, 232, 240, 0.8);">
+                                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
+                                        <i class="fas fa-comments" style="color: #4361ee;"></i> 
+                                        {{ room.room_name }}
+                                    </h3>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
+                                        <span style="color: var(--text-light); font-size: 0.9rem;">
+                                            <i class="fas fa-users"></i> {{ room.members|length }} members
+                                        </span>
+                                        <span style="color: #4361ee; font-weight: 600; font-size: 0.9rem;">
+                                            Enter <i class="fas fa-arrow-right"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: 4rem 2rem;">
+                        <i class="fas fa-comments" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1.5rem;"></i>
+                        <p style="font-size: 1.1rem; margin-bottom: 2rem;">You haven't joined any spaces yet.</p>
+                        <a href="/create-room">
+                            <button class="btn btn-primary" style="padding: 1.25rem 2.5rem;">
+                                <i class="fas fa-magic"></i> Create Your First Space
+                            </button>
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="glass-card" style="padding: 4rem 2rem; text-align: center;">
+                <i class="fas fa-lock" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1.5rem;"></i>
+                <h2>Join Premium Chat Today</h2>
+                <p style="max-width: 600px; margin: 0 auto 2rem auto;">
+                    Create your account to start joining and creating chat spaces. 
+                    Connect with friends, collaborate on projects, and more!
+                </p>
+                <div style="display: flex; gap: 1.5rem; justify-content: center; margin-top: 2rem;">
+                    <a href="/login">
+                        <button class="btn btn-primary" style="min-width: 150px;">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                    </a>
+                    <a href="/signup">
+                        <button class="btn btn-primary" style="min-width: 150px;">
+                            <i class="fas fa-user-plus"></i> Sign Up
+                        </button>
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Floating decorative elements -->
+        <div style="position: fixed; top: 20%; right: 5%; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 70%); z-index: -1; animation: float 6s ease-in-out infinite;"></div>
+        <div style="position: fixed; bottom: 10%; left: 5%; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(249, 199, 79, 0.1) 0%, rgba(249, 199, 79, 0) 70%); z-index: -1; animation: float 8s ease-in-out infinite 2s;"></div>
+    </div>
+</body>
+</html>
