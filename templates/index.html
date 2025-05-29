@@ -3,14 +3,534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Chat</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Premium Chat - Connect & Collaborate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #000000 50%, #18181a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            color: #ffffff;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(36, 35, 59, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(46, 21, 36, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(15, 30, 36, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 2rem;
+            z-index: 100;
+        }
+
+        .logo a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 4rem 3rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.1),
+                transparent,
+                rgba(255, 255, 255, 0.05)
+            );
+            animation: shimmer 3s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(45deg) translateX(-100%); }
+            50% { transform: rotate(45deg) translateX(100%); }
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 700px;
+            margin: 0 auto 2rem auto;
+            line-height: 1.6;
+        }
+
+        .hero-greeting {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Main Content Card */
+        .main-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 3rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: #ffffff;
+        }
+
+        .card-title i {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Rooms Grid */
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .room-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .room-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .room-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .room-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .room-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .room-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .room-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .room-members {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .room-enter {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .room-card:hover .room-enter {
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .empty-description {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Login/Signup Section */
+        .auth-section {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .auth-icon {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+        }
+
+        .auth-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .auth-description {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 600px;
+            margin: 0 auto 3rem auto;
+            line-height: 1.6;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* Floating Elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            top: 20%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            bottom: 20%;
+            left: 10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.15) 0%, transparent 70%);
+            animation-delay: 2s;
+        }
+
+        .orb-3 {
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(120, 219, 255, 0.2) 0%, transparent 70%);
+            animation-delay: 4s;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .hero-section {
+                padding: 3rem 2rem;
+            }
+
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .main-card {
+                padding: 2rem;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .rooms-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .auth-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                min-width: 200px;
+                justify-content: center;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="floating-elements">
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+    </div>
+
     <div class="container">
-        <!-- Improved navbar with glass-card effect -->
-        <nav class="navbar glass-card">
+        <!-- Navigation -->
+        <nav class="navbar">
             <div class="logo">
                 <a href="/"><i class="fas fa-comments"></i> Premium Chat</a>
             </div>
@@ -25,90 +545,161 @@
             </div>
         </nav>
 
-        <!-- Main content area -->
-        <div class="glass-card" style="padding: 3rem; text-align: center; margin-bottom: 3rem;">
-            <h1 style="margin-bottom: 1rem;"><i class="fas fa-comments"></i> Welcome to Premium Chat</h1>
-            <p style="font-size: 1.25rem; max-width: 700px; margin: 0 auto;">
-                Connect and collaborate in real-time with friends and colleagues in your custom chat spaces.
+        <!-- Hero Section -->
+        <div class="hero-section">
+            <h1 class="hero-title">
+                <i class="fas fa-comments"></i>
+                Welcome to Premium Chat
+            </h1>
+            <p class="hero-subtitle">
+                Connect and collaborate in real-time with friends and colleagues in your custom chat spaces. 
+                Experience the future of communication with our premium platform.
             </p>
             
             {% if current_user.is_authenticated %}
-                <h3 style="margin-top: 2rem; display: inline-flex; align-items: center; gap: 0.75rem;">
-                    <i class="fas fa-user-circle"></i> Hello, {{ current_user.username }}!
-                </h3>
+                <div class="hero-greeting">
+                    <i class="fas fa-user-circle"></i>
+                    Hello, {{ current_user.username }}!
+                </div>
             {% endif %}
         </div>
 
         {% if current_user.is_authenticated %}
-            <div class="glass-card" style="padding: 2.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                    <h2 style="margin-bottom: 0;"><i class="fas fa-layer-group"></i> My Spaces</h2>
-                    <a href="/create-room">
-                        <button class="btn btn-primary">
-                            <i class="fas fa-plus-circle"></i> Create New Space
-                        </button>
+            <!-- Main Content -->
+            <div class="main-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-layer-group"></i>
+                        My Spaces
+                    </h2>
+                    <a href="/create-room" class="btn">
+                        <i class="fas fa-plus-circle"></i>
+                        Create New Space
                     </a>
                 </div>
                 
                 {% if rooms %}
-                    <div class="rooms-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div class="rooms-grid" id="roomsGrid">
                         {% for room in rooms %}
-                            <a href="/rooms/{{ room._id.room_id }}" style="text-decoration: none;">
-                                <div class="room-card" style="padding: 1.5rem; background: white; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-lg); transition: var(--transition-smooth); border: 1px solid rgba(226, 232, 240, 0.8);">
-                                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.75rem;">
-                                        <i class="fas fa-comments" style="color: #4361ee;"></i> 
-                                        {{ room.room_name }}
-                                    </h3>
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem;">
-                                        <span style="color: var(--text-light); font-size: 0.9rem;">
-                                            <i class="fas fa-users"></i> {{ room.members|length }} members
-                                        </span>
-                                        <span style="color: #4361ee; font-weight: 600; font-size: 0.9rem;">
-                                            Enter <i class="fas fa-arrow-right"></i>
-                                        </span>
+                            <a href="/rooms/{{ room._id.room_id }}" class="room-card">
+                                <div class="room-header">
+                                    <div class="room-icon">
+                                        <i class="fas fa-comments"></i>
                                     </div>
+                                    <h3 class="room-name">{{ room.room_name }}</h3>
+                                </div>
+                                <div class="room-footer">
+                                    <span class="room-members">
+                                        <i class="fas fa-users"></i> {{ room.members|length }} members
+                                    </span>
+                                    <span class="room-enter">
+                                        Enter <i class="fas fa-arrow-right"></i>
+                                    </span>
                                 </div>
                             </a>
                         {% endfor %}
                     </div>
                 {% else %}
-                    <div style="text-align: center; padding: 4rem 2rem;">
-                        <i class="fas fa-comments" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1.5rem;"></i>
-                        <p style="font-size: 1.1rem; margin-bottom: 2rem;">You haven't joined any spaces yet.</p>
-                        <a href="/create-room">
-                            <button class="btn btn-primary" style="padding: 1.25rem 2.5rem;">
-                                <i class="fas fa-magic"></i> Create Your First Space
-                            </button>
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="empty-title">You haven't joined any spaces yet.</h3>
+                        <p class="empty-description">
+                            Create your first chat space to start connecting with your team and friends.
+                        </p>
+                        <a href="/create-room" class="btn">
+                            <i class="fas fa-magic"></i>
+                            Create Your First Space
                         </a>
                     </div>
                 {% endif %}
             </div>
         {% else %}
-            <div class="glass-card" style="padding: 4rem 2rem; text-align: center;">
-                <i class="fas fa-lock" style="font-size: 3rem; color: var(--text-light); margin-bottom: 1.5rem;"></i>
-                <h2>Join Premium Chat Today</h2>
-                <p style="max-width: 600px; margin: 0 auto 2rem auto;">
-                    Create your account to start joining and creating chat spaces. 
-                    Connect with friends, collaborate on projects, and more!
-                </p>
-                <div style="display: flex; gap: 1.5rem; justify-content: center; margin-top: 2rem;">
-                    <a href="/login">
-                        <button class="btn btn-primary" style="min-width: 150px;">
-                            <i class="fas fa-sign-in-alt"></i> Login
-                        </button>
-                    </a>
-                    <a href="/signup">
-                        <button class="btn btn-primary" style="min-width: 150px;">
-                            <i class="fas fa-user-plus"></i> Sign Up
-                        </button>
-                    </a>
+            <!-- Login/Signup Section -->
+            <div class="main-card">
+                <div class="auth-section">
+                    <div class="auth-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h2 class="auth-title">Join Premium Chat Today</h2>
+                    <p class="auth-description">
+                        Create your account to start joining and creating chat spaces. 
+                        Connect with friends, collaborate on projects, and experience the future of communication.
+                    </p>
+                    <div class="auth-buttons">
+                        <a href="/login" class="btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login
+                        </a>
+                        <a href="/signup" class="btn btn-secondary">
+                            <i class="fas fa-user-plus"></i>
+                            Sign Up
+                        </a>
+                    </div>
                 </div>
             </div>
         {% endif %}
-
-        <!-- Floating decorative elements -->
-        <div style="position: fixed; top: 20%; right: 5%; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0) 70%); z-index: -1; animation: float 6s ease-in-out infinite;"></div>
-        <div style="position: fixed; bottom: 10%; left: 5%; width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, rgba(249, 199, 79, 0.1) 0%, rgba(249, 199, 79, 0) 70%); z-index: -1; animation: float 8s ease-in-out infinite 2s;"></div>
     </div>
+
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to room cards
+            const roomCards = document.querySelectorAll('.room-card');
+            roomCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-8px) scale(1.02)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add click ripple effect to buttons
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+                    
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+
+            // Add ripple animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
 </body>
 </html>
