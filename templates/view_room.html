@@ -4,21 +4,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Premium Chat</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #000000 50%, #18181a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            color: #ffffff;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(36, 35, 59, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(46, 21, 36, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(15, 30, 36, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .logo a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* Main Content */
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 0;
+            margin: 2rem 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            height: calc(100vh - 260px);
+        }
+
         .chat-main {
             display: flex;
             flex-direction: column;
             height: 100%;
-            overflow: hidden; 
+            overflow: hidden;
         }
-        #message_input{
-            width:50%;
-        }
-        .btn{
-            width:100px;
-        }
+
         #messages {
             flex: 1;
             overflow-y: auto;
@@ -26,58 +142,248 @@
             display: flex;
             flex-direction: column;
             gap: 1rem;
-            margin-bottom: 0.5rem;
-            max-height: calc(100vh - 260px); 
         }
-        
+
+        /* Messages */
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: 15px;
+            max-width: 80%;
+            word-wrap: break-word;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .other-message {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-bottom-left-radius: 5px;
+        }
+
+        .system-message {
+            align-self: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 20px;
+        }
+
+        .typing {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Message Form */
         .message-form {
-            position: sticky;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 1rem;
-            border-top: 1px solid rgba(226, 232, 240, 0.5);
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             gap: 1rem;
-            margin-top: auto; /* Push to bottom */
-            border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
-            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.05);
         }
-        
-        .chat-container {
-            height: calc(100vh - 180px);
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 0;
+
+        #message_input {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #message_input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            position: relative;
             overflow: hidden;
+            width: auto;
         }
-        
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Members Panel */
         .members-panel {
-            border-left: 1px solid rgba(226, 232, 240, 0.5);
-            height: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
             overflow-y: auto;
         }
 
-    
-        /* Responsive adjustments */
+        .members-panel h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .members-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .member-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .member-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+        }
+
+        .current-user .member-avatar {
+            background: linear-gradient(135deg, #4ade80 0%, #16a34a 100%);
+        }
+
+        /* Floating Elements */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            top: 20%;
+            right: 10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            bottom: 20%;
+            left: 10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 107, 107, 0.15) 0%, transparent 70%);
+            animation-delay: 2s;
+        }
+
+        .orb-3 {
+            top: 50%;
+            left: 50%;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(120, 219, 255, 0.2) 0%, transparent 70%);
+            animation-delay: 4s;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        /* Responsive Design */
         @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
             .chat-container {
                 grid-template-columns: 1fr;
-                height: calc(100vh - 150px);
+                height: calc(100vh - 220px);
             }
-            
+
             .members-panel {
-                display: none; /* Hide on mobile or make collapsible */
+                display: none;
             }
-            
-            #messages {
-                max-height: calc(100vh - 220px);
+
+            .message {
+                max-width: 90%;
             }
         }
     </style>
 </head>
 <body>
+    <div class="floating-elements">
+        <div class="floating-orb orb-1"></div>
+        <div class="floating-orb orb-2"></div>
+        <div class="floating-orb orb-3"></div>
+    </div>
+
     <div class="container">
-        <nav class="navbar glass-card">
+        <!-- Navigation -->
+        <nav class="navbar">
             <div class="logo">
                 <a href="/"><i class="fas fa-comments"></i> Premium Chat</a>
             </div>
@@ -91,7 +397,7 @@
 
         <h1><i class="fas fa-comment-dots"></i> {{ room.name }}</h1>
 
-        <div class="chat-container glass-card">
+        <div class="chat-container">
             <div class="chat-main">
                 <div id="messages">
                     {% for message in room_messages %}
@@ -107,7 +413,7 @@
 
                 <form id="message_input_form" class="message-form">
                     <input type="text" id="message_input" placeholder="Type your message here..." autocomplete="off">
-                    <button type="submit" class="btn btn-primary send-btn"><i class="fas fa-paper-plane"></i> Send</button>
+                    <button type="submit" class="send-btn"><i class="fas fa-paper-plane"></i> Send</button>
                 </form>
             </div>
 
